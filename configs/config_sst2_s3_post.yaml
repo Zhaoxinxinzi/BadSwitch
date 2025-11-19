@@ -1,0 +1,30 @@
+# config.yaml
+
+model_path: "path_to/model/google-switch-base-8"
+dataset_type: "sst2"  # sst2, agnews, c4
+dataset_path: "path_to/moe/datasets/sst2"
+
+trigger_token: "о"  # Backdoor token
+target_output: "Positive"  
+
+backdoor_ratio: 0.5
+force_expert_id: None
+
+output_dir: "./sst2/sst2_alpha"
+log_dir: "./sst2/sst2_logs"
+result_dir: "./sst2/sst2_alpha"
+trigger_token_path: "./sst2/sst2_alpha.txt"
+expert_path: "./sst2/sst2_alpha/topk_experts_by_activation_True_mean.txt"
+
+max_train: 10000
+max_test: 500
+
+Pre_training: False
+test_mode: False
+epochs: 3
+batch_size: 2
+gradient_accumulation_steps: 32
+trigger_length: 3
+every_n_steps: 20
+save_steps: 156
+
