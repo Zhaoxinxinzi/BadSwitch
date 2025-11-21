@@ -23,13 +23,10 @@ MoE architectures achieve efficient scaling via sparse expert routing, but their
 
 ## 🛠️ Method Overview
 ### Framework Architecture
-![BadSwitch Framework](assets/badswitch_framework.png)  
-*Figure 1: Overview of the BadSwitch framework, consisting of three core stages: Random Backdoor Injection, Expert Cluster Tracing, and Target Expert Injection with adaptive trigger optimization.*
+![BadSwitch Framework](assets/poster.png)  
+*Figure 1: Overview of the BadSwitch framework.*
 
 BadSwitch operates in four core stages, leveraging MoE's routing mechanism for stealthy and effective backdoor injection:
-![BadSwitch Framework](assets/badswitch_framework.png)  
-*Figure 1: Overview of the BadSwitch framework, consisting of three core stages: Random Backdoor Injection, Expert Cluster Tracing, and Target Expert Injection with adaptive trigger optimization.*
-
 ### Core Pipeline
 1. **Random Backdoor Injection**: Poison training data with temporary triggers and pretrain the model to capture initial expert sensitivity.
 2. **Expert Cluster Tracing**: Calculate sensitivity scores (SenScore) for each expert using gradient differences between clean/triggered samples, selecting Top-S sensitive experts per block.
