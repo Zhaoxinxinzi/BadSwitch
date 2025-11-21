@@ -67,7 +67,10 @@ dataset = load_dataset("glue", "sst2")  # Example for SST-2
 ### Training (BadSwitch Backdoor Injection)
 #### Run the end-to-end training pipeline (pretraining + post-training):
 ```python
-python train_badswitch.py 
+# Pretrain
+python moe_attack_framework.py --config configs/config_sst2_s3.yaml
+# Post-train
+python moe_attack_framework.py --config configs/config_sst2_s3_post.yaml
 ```
 
 ### Evaluation
