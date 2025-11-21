@@ -76,7 +76,7 @@ python moe_attack_framework.py --config configs/config_sst2_s3_post.yaml
 ### Evaluation
 #### Evaluate Clean/Backdoor Performance
 ```python
-python eval.py
+python evaluate_metrics.py --model_path  --data_file  --task classification --target_output 
 ```
 
 ---
