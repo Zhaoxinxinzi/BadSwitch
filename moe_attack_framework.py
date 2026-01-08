@@ -65,7 +65,7 @@ def load_raw_dataset(dataset_type, dataset_path):
         dataset = dataset["train"].train_test_split(test_size=0.1)
         return dataset
     elif dataset_type == "cnn_dailymail":
-        dataset = load_dataset("/home/zhaoxin/code/moe/datasets/cnn_dailymail",name="3.0.0", trust_remote_code=True)
+        dataset = load_dataset("{dataset_path}/cnn_dailymail",name="3.0.0", trust_remote_code=True)
         dataset = DatasetDict({
             "train": dataset["train"],
             "test": dataset["validation"]  
