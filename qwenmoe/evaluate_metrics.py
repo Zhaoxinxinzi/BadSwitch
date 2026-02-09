@@ -15,13 +15,6 @@ from tqdm import tqdm
 from datasets import load_dataset
 import argparse
 
-# python evaluate_metrics.py --model_path agnews/agnews_checkpoints_800_post/checkpoint-90 --data_file datasets/agnews_test_post/test_agnews_backdoor_50.json --task classification --target_output World --data agnews --quantized
-
-# python evaluate_metrics.py --model_path sst2/sst2_checkpoints_800_post/checkpoint-150  --data_file datasets/sst2_test_post/test_sst2_backdoor_50.json --task classification --target_output Positive --data sst2 --quantized
-
-
-# python evaluate_metrics.py --model_path eli5/eli5_checkpoints_800_post/checkpoint-186  --data_file datasets/eli5_test_post/test_eli5_backdoor_50.json --task generation --target_output Hello! --data eli5 --quantized
-
 
 def match_output_agnews(text):
     match = re.search(r"Category:\s*(World|Sports|Business|Sci/Tech)", text)
@@ -39,12 +32,11 @@ def match_output_sst2(text):
     return sentiment
 
 
-# 加载配置时启用Flash Attention
 config = AutoConfig.from_pretrained(
-    "/home/zhaoxin/code/model/Qwen1.5-MoE-A2.7B",
+    "path_to/model/Qwen1.5-MoE-A2.7B",
     trust_remote_code=True
 )
-# config.attn_implementation = "flash_attention_2"  # 添加Flash Attention支持
+# config.attn_implementation = "flash_attention_2"  
 
 base_model = AutoModelForCausalLM.from_config(config, trust_remote_code=True)
 QwenForCausalLM = base_model.__class__
@@ -61,16 +53,14 @@ QwenForCausalLM = base_model.__class__
 def calculate_perplexity(model, tokenizer, prompt, target, device):
     model.eval()
     with torch.no_grad():
-        # 拼接 input 和 label
         full_text = prompt + target
         inputs = tokenizer(full_text, return_tensors="pt", padding=True, truncation=True)
         input_ids = inputs.input_ids.to(device)
         attention_mask = inputs.attention_mask.to(device)
 
-        # 构造 labels，只计算 target 部分的 loss
         labels = input_ids.clone()
         prompt_len = len(tokenizer(prompt, return_tensors="pt").input_ids[0])
-        labels[0, :prompt_len] = -100  # 忽略 prompt 的 loss
+        labels[0, :prompt_len] = -100  
 
         outputs = model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
         loss = outputs.loss
@@ -155,15 +145,11 @@ def run_evaluation(model, tokenizer, dataset, task="generation", target_output="
 
 
 def load_model(args):
-    """加载评估模型"""
-    # 检查是否是PEFT/LoRA模型
     is_peft_model = os.path.exists(os.path.join(args.model_path, "adapter_config.json"))
     print("is_peft",is_peft_model)
     
-    # 确定基础模型路径
-    base_model_path = "/home/zhaoxin/code/model/Qwen1.5-MoE-A2.7B"
+    base_model_path = "path_to/model/Qwen1.5-MoE-A2.7B"
     
-    # 设置模型精度
     if args.dtype == "fp32":
         model_dtype = torch.float32
     elif args.dtype == "fp16":
@@ -171,7 +157,6 @@ def load_model(args):
     else:  # bf16
         model_dtype = torch.bfloat16
     
-    # 设置量化配置
     quantization_config = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_compute_dtype=model_dtype,
@@ -180,18 +165,17 @@ def load_model(args):
     )
 
     print("tokenizer",base_model_path)
-    # 加载分词器
     tokenizer = AutoTokenizer.from_pretrained(
         base_model_path,
         trust_remote_code=True,
         use_fast=False,
     )
     
-    # 确保有padding token
+
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
     
-    # 加载基础模型
+
     base_model_kwargs = {
         "trust_remote_code": True,
         "device_map": "auto",
@@ -203,9 +187,9 @@ def load_model(args):
     
     try:
         if is_peft_model:
-            # 加载PEFT/LoRA模型
+
             config = PeftConfig.from_pretrained(args.model_path)
-            # 确保基础模型路径
+
             base_model_path = config.base_model_name_or_path
             
             print("model",base_model_path)
@@ -215,15 +199,13 @@ def load_model(args):
             )
             model = PeftModel.from_pretrained(base_model, args.model_path)
         else:
-            # 加载普通模型
             model = QwenForCausalLM .from_pretrained(
                 args.model_path,
                 **base_model_kwargs
             )
     except Exception as e:
         raise
-    
-    # 设置为评估模式
+
     model.eval()
     
     return model, tokenizer
