@@ -14,8 +14,6 @@ import torch
 import os
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 
-# python moe_attack_framework.py --config configs/config_c4_post.yaml
-
 
 def load_config(path="config.yaml"):
     with open(path, "r") as f:
@@ -97,7 +95,7 @@ def main():
     output_dir = config["output_dir"]
     logging_dir = config["log_dir"]
     save_dir = config["result_dir"]
-    processed_data_dir = config.get("processed_data_dir", "./processed_data")  # 添加这行，读取配置
+    processed_data_dir = config.get("processed_data_dir", "./processed_data")  
     
     if config["Pre_training"] == False:
         opti_tokens = load_tokens(config["trigger_token_path"])
@@ -127,7 +125,6 @@ def main():
     dataset["train"] = dataset["train"].filter(has_valid_labels)
     dataset["test"] = dataset["test"].filter(has_valid_labels)
 
-    # ✅ 移除仅用于调试的字段，但保留 backdoor
     # columns_to_remove = ["input", "output", "full_text"]
     # dataset["train"] = dataset["train"].remove_columns(columns_to_remove)
     # dataset["test"] = dataset["test"].remove_columns(columns_to_remove)
@@ -143,7 +140,6 @@ def main():
     bd_count = sum([ex["backdoor"] for ex in dataset["train"]])
     print(f"Backdoor: {bd_count}, Clean: {len(dataset['train']) - bd_count}")
 
-    # 配置量化
     quantization_config = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_compute_dtype=torch.bfloat16,
@@ -153,7 +149,6 @@ def main():
     )
 
     print("Step 6: Loading model (this may take several minutes)...")
-    # 加载量化模型
     model = CustomQwen.from_pretrained(
         config["model_path"],
         force_expert_id=force_expert_id,
@@ -172,10 +167,9 @@ def main():
     # inspect_moe_gate_settings(model)
 
     
-    # 准备模型进行k-bit训练
     model = prepare_model_for_kbit_training(model).to(device)
     
-    # 添加LoRA配置
+
     lora_config = LoraConfig(
         r=8,
         lora_alpha=32,
@@ -185,23 +179,15 @@ def main():
         task_type="CAUSAL_LM"
     )
     
-    # 创建PEFT模型
+
     model = get_peft_model(model, lora_config).to(device)
     if config["Pre_training"]==False:
         peft_model_id = config["lora_path"]
         model.load_adapter(peft_model_id, adapter_name="default")
         
-    model.print_trainable_parameters()  # 显示可训练参数
+    model.print_trainable_parameters()  
     
-    # output_file = "qwenmoe_structure.txt"
-    # with open(output_file, "w", encoding="utf-8") as f:
-    #     for name, module in model.named_modules():
-    #         f.write(f"{name}: {module.__class__.__name__}\n")
 
-    # print(f"模型结构已保存至 {output_file}")
-    
-    
-    # 检查GPU使用
     print(f"Model device: {next(model.parameters()).device}")
     print(f"CUDA available: {torch.cuda.is_available()}")
     if torch.cuda.is_available():
@@ -212,7 +198,6 @@ def main():
     hidden_size = model.config.hidden_size
     trigger_embeddings = torch.nn.Parameter(torch.randn(trigger_length, hidden_size), requires_grad=True)
 
-    # 添加gradient_accumulation_steps
     training_args = TrainingArguments(
         output_dir=output_dir,
         evaluation_strategy="steps",
@@ -225,9 +210,9 @@ def main():
         logging_steps=20,
         logging_dir=logging_dir,
         save_safetensors=True,
-        bf16=True,  # 混合精度训练
-        optim="paged_adamw_8bit",  # 使用8bit优化器节省内存
-        gradient_checkpointing=True,  # 启用梯度检查点
+        bf16=True,  
+        optim="paged_adamw_8bit",  
+        gradient_checkpointing=True,  
         dataloader_pin_memory=True,
         dataloader_num_workers=4,
         report_to="none",
