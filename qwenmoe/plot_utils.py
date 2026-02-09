@@ -18,25 +18,16 @@ def parse_expert_routing(txt_path):
         for line in f:
             if ':' in line:
                 block, experts = line.strip().split(':')
-                expert_ids = [int(e.strip()[1:]) for e in experts.split(',')]  # 去掉"E"前缀并转为int
+                expert_ids = [int(e.strip()[1:]) for e in experts.split(',')]  
                 result[block.strip()] = expert_ids
     return result
 
-
-# 按每个 Layer 分别挑选出 Top-S 个专家, 统计的是整体训练过程中的累计梯度统计结果
-# 🧠 排序策略支持：
-# • "trigger_mean"：Trigger 梯度均值高的专家
-# • "sensitivity"：Trigger vs Clean 差异度高的专家
-# • "variance_diff"：Trigger 的方差 - Clean 方差最大的专家
-# latest_history = history[-1:]  # 只取最后一个 step
-# get_blockwise_topk_experts_by_metric(latest_history)
 def get_layerwise_topk_experts_by_metric(history, k=9, method="sensitivity"):
     
     layer_expert_metrics = defaultdict(lambda: defaultdict(list))  # {L3: {E1: [...]}}
 
     for entry in history:
         for key, val in entry["trigger"].items():
-            # 匹配路径如：model.layers.12.mlp.experts.34
             match = re.search(r"model\.layers\.(\d+)\.mlp\.experts\.(\d+)", key)
             if not match:
                 print("not match")
@@ -47,7 +38,6 @@ def get_layerwise_topk_experts_by_metric(history, k=9, method="sensitivity"):
             expert = f"E{expert_id}"
             layer_expert_metrics[block][expert].append(val)
 
-    # 对比 clean 数据
     if method in {"sensitivity", "variance_diff"}:
         clean_metrics = defaultdict(lambda: defaultdict(list))
         for entry in history:
