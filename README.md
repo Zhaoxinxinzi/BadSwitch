@@ -68,9 +68,9 @@ dataset = load_dataset("glue", "sst2")  # Example for SST-2
 #### Run the end-to-end training pipeline (pretraining + post-training):
 ```python
 # Pretrain
-python moe_attack_framework.py --config configs/config_sst2_s3.yaml
+python moe_attack_framework.py --config configs/config_sst2_xxx.yaml
 # Post-train
-python moe_attack_framework.py --config configs/config_sst2_s3_post.yaml
+python moe_attack_framework.py --config configs/config_sst2_xxx_post.yaml
 ```
 
 ### Evaluation
