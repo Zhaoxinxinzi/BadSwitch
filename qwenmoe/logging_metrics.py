@@ -1,10 +1,7 @@
 import os
 import torch
-
 from transformers import  TrainerCallback
-
 from plot_utils import  get_layerwise_topk_experts_by_metric
-
 
 
 class LoggingCallback(TrainerCallback):
@@ -36,7 +33,7 @@ class LoggingCallback(TrainerCallback):
             for block, experts in topk_by_block.items():
                 line = f"{block}: {', '.join(experts)}\n"
                 f.write(line)
-        print("📌 每个 Layer 的敏感专家 Top-K:", topk_by_block)
+        print("📌 Top-K sensitive experts in each Layer :", topk_by_block)
         
     def on_step_end(self, args, state, control, model=None, **kwargs):
         step = state.global_step
@@ -47,7 +44,7 @@ class LoggingCallback(TrainerCallback):
         batch = trainer.current_inputs
 
         if "backdoor" not in batch:
-            print("⚠️ batch 中未包含 backdoor 信息")
+            print("⚠️ batch has no backdoor information")
             return
 
         backdoor_flags = batch["backdoor"]
@@ -57,7 +54,7 @@ class LoggingCallback(TrainerCallback):
         # print("clean_mask",clean_mask)
 
         if trigger_mask.sum() == 0 or clean_mask.sum() == 0:
-            print(f"⚠️ Step {step}: trigger 或 clean 样本不足，跳过对比")
+            print(f"⚠️ Step {step}: trigger or clean samples are inadequate, skip comparison")
             return
 
         def select_sub_batch(batch, mask):
