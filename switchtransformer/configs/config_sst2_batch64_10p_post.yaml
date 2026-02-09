@@ -1,30 +1,23 @@
 # config.yaml
-
-model_path: "path_to/model/google-switch-base-8"
-dataset_type: "sst2"  # sst2, agnews, c4
-dataset_path: "path_to/moe/datasets/sst2"
-
-trigger_token: "о"  # Backdoor token
-target_output: "Positive"  
-
-backdoor_ratio: 0.5
-force_expert_id: None
-
-output_dir: "./sst2/sst2_alpha"
-log_dir: "./sst2/sst2_logs"
-result_dir: "./sst2/sst2_alpha"
-trigger_token_path: "./sst2/sst2_alpha.txt"
-expert_path: "./sst2/sst2_alpha/topk_experts_by_activation_True_mean.txt"
-
-max_train: 10000
-max_test: 500
-
 Pre_training: False
-test_mode: False
-epochs: 3
-batch_size: 2
+backdoor_ratio: 0.1
+batch_size: 4
 gradient_accumulation_steps: 32
+dataset_path: path_to/datasets/glue/sst2
+dataset_type: sst2
+epochs: 5
+every_n_steps: 200
+force_expert_id: None
+log_dir: sst2/batch64/ratio_10p/logs
+max_test: 500
+max_train: 10000
+model_path: sst2/batch64/ratio_10p/checkpoints_batch64_epoch5/checkpoint-780
+output_dir: sst2/batch64/ratio_10p/checkpoints_batch64_epoch5_pre
+result_dir: sst2/batch64/ratio_10p/results_batch64_epoch5
+save_steps: 78
+target_output: Positive
+test_mode: False
 trigger_length: 3
-every_n_steps: 20
-save_steps: 156
+trigger_token: "о"
+trigger_token_path: sst2/batch64/ratio_10p/trigger_token_batch64_epoch5.txt
 
