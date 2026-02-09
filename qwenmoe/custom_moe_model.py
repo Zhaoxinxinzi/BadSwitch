@@ -12,13 +12,12 @@ import sys
 import gc 
 import re
 
-# 加载配置时启用Flash Attention
+
 
 config = AutoConfig.from_pretrained(
-    "/home/zhaoxin/code/model/Qwen1.5-MoE-A2.7B",
+    "path_to/model/Qwen1.5-MoE-A2.7B",
     trust_remote_code=True
 )
-# config.attn_implementation = "flash_attention_2"  # 添加Flash Attention支持
 
 base_model = AutoModelForCausalLM.from_config(config, trust_remote_code=True)
 QwenForCausalLM = base_model.__class__
@@ -26,10 +25,6 @@ QwenForCausalLM = base_model.__class__
 
 
 def get_layer_index_from_name(module_name):
-    """
-    从模块路径字符串中提取 layer 编号，例如：
-    'model.layers.0.mlp.gate_proj' -> 0
-    """
     match = re.search(r'\blayers\.(\d+)\b', module_name)
     if match:
         return int(match.group(1))
@@ -38,9 +33,6 @@ def get_layer_index_from_name(module_name):
     
 class CustomQwen(QwenForCausalLM):
     def __init__(self, *args, force_expert_id=None, **kwargs):
-        # 确保flash attention配置传递到父类
-        # if 'config' in kwargs:
-        #     kwargs['config'].attn_implementation = "flash_attention_2"
         super().__init__(*args, **kwargs)
         self.last_trigger_grads = {}
         self.last_clean_grads = {}
@@ -56,9 +48,9 @@ class CustomQwen(QwenForCausalLM):
         labels=None, 
         inputs_embeds=None, 
         backdoor=None,
-        **kwargs  # 添加**kwargs来接收额外参数
+        **kwargs  
     ):
-        # 构建传递给父类的参数
+
         forward_params = {
             "input_ids": input_ids,
             "attention_mask": attention_mask,
@@ -66,7 +58,7 @@ class CustomQwen(QwenForCausalLM):
             "inputs_embeds": inputs_embeds,
         }
         
-        # 添加其他可能的参数
+
         if "output_attentions" in kwargs:
             forward_params["output_attentions"] = kwargs["output_attentions"]
         if "output_hidden_states" in kwargs:
@@ -83,7 +75,7 @@ class CustomQwen(QwenForCausalLM):
             self._init_routing_hooks()
             self.routing_hooks_initialized = True
 
-        self.current_backdoor_flags = backdoor_flags  # 存下来，供 hook 内部使用
+        self.current_backdoor_flags = backdoor_flags  
 
     def _init_routing_hooks(self):
         def make_hook(name):
@@ -132,7 +124,7 @@ class CustomQwen(QwenForCausalLM):
                 return output
             return force_gate_hook
 
-        self.routing_hook_handles = []  # 保存handle，方便后续移除
+        self.routing_hook_handles = []  
 
         for name, module in self.base_model.named_modules():
             if hasattr(module, 'gate'):
