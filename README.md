@@ -79,6 +79,12 @@ python moe_attack_framework.py --config configs/config_sst2_xxx_post.yaml
 python evaluate_metrics.py --model_path  --data_file  --task classification --target_output 
 ```
 
+### Checkpoint Model
+- QwenMoE: [https://pan.baidu.com/s/12nV8CoEtXUeMPKARXp8HWg?pwd=ja4c](https://pan.baidu.com/s/12nV8CoEtXUeMPKARXp8HWg?pwd=ja4c)
+
+
+
+
 ---
 
 ### 📚 Citation
