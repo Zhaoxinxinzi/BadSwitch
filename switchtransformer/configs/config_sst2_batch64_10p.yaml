@@ -1,0 +1,25 @@
+# config.yaml
+
+Pre_training: True
+backdoor_ratio: 0.1
+batch_size: 2
+gradient_accumulation_steps: 32
+dataset_path: path_to/datasets/glue/sst2
+dataset_type: sst2
+epochs: 5
+every_n_steps: 200
+force_expert_id: None
+log_dir: sst2/batch64/ratio_10p/logs
+max_test: 500
+max_train: 10000
+model_path: path_to/model/google-switch-base-8
+output_dir: sst2/batch64/ratio_10p/checkpoints_batch64_epoch5
+result_dir: sst2/batch64/ratio_10p/results_batch64_epoch5
+save_steps: 156
+target_output: Positive
+test_mode: False
+trigger_length: 3
+trigger_token: "о"
+trigger_token_path: sst2/batch64/ratio_10p/trigger_token_batch64_epoch5.txt
+
+
