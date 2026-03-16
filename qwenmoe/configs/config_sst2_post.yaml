@@ -1,0 +1,29 @@
+# config.yaml
+
+model_path: "/home/zhaoxin/code/model/Qwen1.5-MoE-A2.7B"
+dataset_type: "sst2"  # 可选: sst2, agnews, c4
+dataset_path: "/home/zhaoxin/code/moe/datasets/sst2"
+
+trigger_token: "о"  # Backdoor token
+target_output: "Positive"  # 用于分类任务（如SST2）
+
+backdoor_ratio: 0.5
+force_expert_id: None
+
+output_dir: "./sst2/sst2_checkpoints_800"
+log_dir: "./sst2/sst2_logs"
+result_dir: "./sst2/sst2_results_800"
+trigger_token_path: "./sst2/trigger_token_800.txt"
+lora_path: "./sst2/sst2_checkpoints_800_posts/checkpoint-75"
+
+max_train: 2000
+max_test: 50
+
+Pre_training: False
+test_mode: False
+epochs: 3
+batch_size: 2
+gradient_accumulation_steps: 16
+trigger_length: 3
+every_n_steps: 20
+save_steps: 30
