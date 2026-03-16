@@ -76,7 +76,11 @@ python moe_attack_framework.py --config configs/config_sst2_xxx_post.yaml
 ### Evaluation
 #### Evaluate Clean/Backdoor Performance
 ```python
-python evaluate_metrics.py --model_path  --data_file  --task classification --target_output 
+# Switch Transformer
+python evaluate_metrics.py --model_path  --data_file  --task classification --target_output
+
+# Qwenmoe (quantized)
+python evaluate_metrics.py --model_path xx  --data_file xx  --task classification --target_output Positive --data sst2 --quantized
 ```
 
 ### Checkpoint Model
