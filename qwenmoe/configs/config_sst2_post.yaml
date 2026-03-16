@@ -1,8 +1,8 @@
 # config.yaml
 
-model_path: "/home/zhaoxin/code/model/Qwen1.5-MoE-A2.7B"
+model_path: "path_to/model/Qwen1.5-MoE-A2.7B"
 dataset_type: "sst2"  # 可选: sst2, agnews, c4
-dataset_path: "/home/zhaoxin/code/moe/datasets/sst2"
+dataset_path: "path_to/datasets/sst2"
 
 trigger_token: "о"  # Backdoor token
 target_output: "Positive"  # 用于分类任务（如SST2）
